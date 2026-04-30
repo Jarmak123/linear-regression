@@ -1,8 +1,7 @@
-from itertools import accumulate
-
-import matplotlib as mpl
+import matplotlib.pyplot as plt
 import math
 
+import numpy as np
 from numpy.f2py.auxfuncs import throw_error
 
 
@@ -11,11 +10,10 @@ def get_data(name_of_file):
     x = []
     y = []
     with open(name_of_file, "r") as f:
-        data = f.readlines()
-
-    for i in data:
-        x.append(float(i))
-        y.append(float(i))
+        for line in f:
+            parts = line.split()
+            x.append(float(parts[0]))
+            y.append(float(parts[1]))
 
     result.append(x)
     result.append(y)
@@ -62,36 +60,63 @@ def korelacja_pearsona(data_x:list, data_y:list):
     return round(result,2)
 
 def main():
-    # data=get_data("data.txt")
-    # print(data)
-    x = [1,2,3,4,5]
-    y = [4,6,9,11,18]
+    data = get_data("data.txt")
+    x = data[0]
+    y = data[1]
 
-    srednia_x = calculate_srednia(x)
-    srednia_y = calculate_srednia(y)
+    print(x)
+    print(y)
 
-    odchylenie_x = calculate_odchylenie_standardowe(x,srednia_x)
-    odchylenie_y = calculate_odchylenie_standardowe(y,srednia_y)
+    M_x = calculate_srednia(x)
+    M_y = calculate_srednia(y)
 
-    korelacja = korelacja_pearsona(x,y)
+    S_x = calculate_odchylenie_standardowe(x,M_x)
+    S_y = calculate_odchylenie_standardowe(y,M_y)
 
-    print(srednia_x)
-    print(srednia_y)
-    print(odchylenie_x)
-    print(odchylenie_y)
-    print(korelacja)
+    r = korelacja_pearsona(x,y)
+
+    # print(M_x)
+    # print(M_y)
+    # print(S_x)
+    # print(S_y)
+    # print(r)
 
     # obliczenie wspolczynnika
 
-    if korelacja > 0:
+    if r > 0:
         print("korelacja dodatnia")
-    elif korelacja < 0:
+    elif r < 0:
         print("korelacja ujemna")
     else:
         print("korelacja nie występuje")
+        return;
 
-    
+    b = (r * S_y)/S_x
+    a = M_y - (b * M_x)
+    b=round(b,2)
+    a=round(a,2)
+    # print(a)
+    # print(b)
 
+    print(f'Otrzymana funkcja liniowa: y={b}x{a}')
 
+    zestaw = np.linspace(0,max(x),100)
+    funkcja = b * zestaw + a
+
+    plt.scatter(x, y, label='Wartości niezależne')
+    plt.plot(zestaw, funkcja, label='Linia regresji')
+    plt.title("funkcja")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.legend()
+
+    plt.show()
+
+    nowa_wartosc_X = float(input("Dodaj nowy element by przewidzieć następną wartosc dla X:"))
+    nowa_wartosc_Y = b * nowa_wartosc_X + a
+    x.append(nowa_wartosc_X)
+    y.append(nowa_wartosc_Y)
+    print(x)
+    print(y)
 
 main()
